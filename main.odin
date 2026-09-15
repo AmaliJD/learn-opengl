@@ -23,7 +23,7 @@ main :: proc()
     glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 3)
     glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 
-    window := glfw.CreateWindow(i32(SCREEN_WIDTH), i32(SCREEN_HEIGHT), "Dungeon Slime", nil, nil)
+    window := glfw.CreateWindow(i32(SCREEN_WIDTH), i32(SCREEN_HEIGHT), "Learn OpenGL", nil, nil)
     if window == nil {
         return
     }

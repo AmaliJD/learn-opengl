@@ -28,6 +28,7 @@ render_loop :: proc(window: glfw.WindowHandle)
 {
     //basics_scene(window)
     lighting_scene(window)
+    //model_scene(window)
 }
 
 process_input :: proc(window: glfw.WindowHandle)
