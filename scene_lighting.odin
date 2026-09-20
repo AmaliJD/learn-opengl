@@ -14,7 +14,7 @@ import stbi "vendor:stb/image"
 
 lighting_scene :: proc(window: glfw.WindowHandle)
 {
-    cam = create_camera(vec3{0, 0, 3})
+    //cam = create_camera(vec3{0, 0, 3})
 
     gl.Enable(gl.DEPTH_TEST)
 

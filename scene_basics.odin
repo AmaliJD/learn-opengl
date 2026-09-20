@@ -14,7 +14,7 @@ import stbi "vendor:stb/image"
 
 basics_scene :: proc(window: glfw.WindowHandle)
 {
-    cam = create_camera(vec3{0, 0, 3})
+    //cam = create_camera(vec3{0, 0, 3})
 
     optimized_vertices : []f32 = {
         // positions        // tex coords   // color
@@ -151,4 +151,6 @@ basics_scene :: proc(window: glfw.WindowHandle)
         glfw.PollEvents()
         glfw.SwapBuffers(window)
     }
+
+    
 }

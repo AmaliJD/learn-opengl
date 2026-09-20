@@ -11,6 +11,7 @@ import "vendor:glfw"
 import gl "vendor:OpenGL"
 import "glx"
 import stbi "vendor:stb/image"
+import tt "vendor:stb/truetype"
 
 cam: Camera
 
@@ -26,9 +27,12 @@ MAT4_IDENTITY : mat4 : 1
 
 render_loop :: proc(window: glfw.WindowHandle)
 {
+    cam = create_camera(vec3{0, 0, 3})
+
     //basics_scene(window)
-    lighting_scene(window)
+    //lighting_scene(window)
     //model_scene(window)
+    text_rendering_scene(window)
 }
 
 process_input :: proc(window: glfw.WindowHandle)
@@ -88,7 +92,7 @@ mouse_callback :: proc "c" (window: glfw.WindowHandle, x_pos_64, y_pos_64: f64)
 
     if !mouse_init
     {
-        prev_mouse_x = x_pos
+        prev_mouse_x = x_pos 
         prev_mouse_y = y_pos
         mouse_init = true
     }
