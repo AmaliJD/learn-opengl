@@ -103,6 +103,27 @@ shader_set_mat4 :: proc(shader: Shader, name: cstring, value: matrix[4, 4]f32)
     gl.UniformMatrix4fv(gl.GetUniformLocation(shader, name), 1, false, &value_addressable[0, 0])
 }
 
+
+shader_set_vec2 :: proc
+{
+    shader_set_vec2_2f,
+    shader_set_vec2_2fv,
+}
+
+@private
+shader_set_vec2_2f :: proc(shader: Shader, name: cstring, x, y: f32)
+{
+    gl.Uniform2f(gl.GetUniformLocation(shader, name), x, y)
+}
+
+@private
+shader_set_vec2_2fv :: proc(shader: Shader, name: cstring, value: vec2)
+{
+    value_addressable := value
+    gl.Uniform2fv(gl.GetUniformLocation(shader, name), 1, &value_addressable[0])
+}
+
+
 shader_set_vec3 :: proc
 {
     shader_set_vec3_3f,
@@ -120,4 +141,24 @@ shader_set_vec3_3fv :: proc(shader: Shader, name: cstring, value: vec3)
 {
     value_addressable := value
     gl.Uniform3fv(gl.GetUniformLocation(shader, name), 1, &value_addressable[0])
+}
+
+
+shader_set_vec4 :: proc
+{
+    shader_set_vec4_4f,
+    shader_set_vec4_4fv,
+}
+
+@private
+shader_set_vec4_4f :: proc(shader: Shader, name: cstring, x, y, z, w: f32)
+{
+    gl.Uniform4f(gl.GetUniformLocation(shader, name), x, y, z, w)
+}
+
+@private
+shader_set_vec4_4fv :: proc(shader: Shader, name: cstring, value: vec4)
+{
+    value_addressable := value
+    gl.Uniform4fv(gl.GetUniformLocation(shader, name), 1, &value_addressable[0])
 }
