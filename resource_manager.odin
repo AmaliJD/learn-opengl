@@ -19,7 +19,7 @@ Resource_Manager :: struct
     textures: map[string]Texture2D,
 }
 
-resource_manager := Resource_Manager{}
+resource_manager: Resource_Manager
 
 rm_create_shader :: proc(vertex_path, fragment_path, name: string)
 {

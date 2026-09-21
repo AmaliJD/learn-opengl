@@ -130,13 +130,13 @@ shader_set_vec3 :: proc
     shader_set_vec3_3fv,
 }
 
-@private
+@(private="file")
 shader_set_vec3_3f :: proc(shader: Shader, name: cstring, x, y, z: f32)
 {
     gl.Uniform3f(gl.GetUniformLocation(shader, name), x, y, z)
 }
 
-@private
+@(private="file")
 shader_set_vec3_3fv :: proc(shader: Shader, name: cstring, value: vec3)
 {
     value_addressable := value
@@ -150,13 +150,13 @@ shader_set_vec4 :: proc
     shader_set_vec4_4fv,
 }
 
-@private
+@(private="file")
 shader_set_vec4_4f :: proc(shader: Shader, name: cstring, x, y, z, w: f32)
 {
     gl.Uniform4f(gl.GetUniformLocation(shader, name), x, y, z, w)
 }
 
-@private
+@(private="file")
 shader_set_vec4_4fv :: proc(shader: Shader, name: cstring, value: vec4)
 {
     value_addressable := value

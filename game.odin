@@ -47,5 +47,5 @@ input :: proc(game: ^Game, window: glfw.WindowHandle, dt: f64)
 
 render :: proc(game: ^Game)
 {
-
+    draw_sprite(Renderer, rm_get_texture2d("face"), vec2{200,200}, vec2{300,400}, 45, vec3{1, .2, .8})
 }

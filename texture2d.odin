@@ -36,8 +36,8 @@ create_texture2d :: proc(path: cstring, alpha: bool) -> Texture2D
     texture.width = 0
     texture.height = 0
 
-    texture.internal_format = alpha ? gl.RGB : gl.RGBA
-    texture.image_format = alpha ? gl.RGB : gl.RGBA
+    texture.internal_format = alpha ? gl.RGBA : gl.RGB
+    texture.image_format = alpha ? gl.RGBA : gl.RGB
 
     texture.wrap_s = gl.REPEAT
     texture.wrap_t = gl.REPEAT
