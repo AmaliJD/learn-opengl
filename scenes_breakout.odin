@@ -13,8 +13,8 @@ import "glx"
 import stbi "vendor:stb/image"
 import tt "vendor:stb/truetype"
 
-Breakout: Game
-Renderer: Sprite_Renderer
+_breakout: Game
+_sp: Sprite_Renderer
 
 breakout_scene :: proc(window: glfw.WindowHandle)
 {
@@ -22,9 +22,9 @@ breakout_scene :: proc(window: glfw.WindowHandle)
     gl.Enable(gl.BLEND)
     gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-    Breakout = create_game(u32(SCREEN_WIDTH), u32(SCREEN_HEIGHT))
+    _breakout = create_game(u32(SCREEN_WIDTH), u32(SCREEN_HEIGHT))
 
-    init()
+    init_game(&_breakout)
 
     for !glfw.WindowShouldClose(window)
     {
@@ -34,15 +34,15 @@ breakout_scene :: proc(window: glfw.WindowHandle)
         glfw.PollEvents()
 
         // input
-        input(&Breakout, window, delta_time)
+        input(&_breakout, window, delta_time)
 
         // update
-        update(&Breakout, delta_time)
+        update(&_breakout, delta_time)
 
         // render
         gl.ClearColor(rgba(BG))
         gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-        render(&Breakout)
+        render(&_breakout)
 
         // end
         glfw.SwapBuffers(window)
@@ -60,22 +60,7 @@ key_callback_breakout :: proc "c" (window: glfw.WindowHandle, key, scancode, act
 
     if key >= 0 && key < 1024
     {
-        if action == glfw.PRESS do Breakout.keys[key] = true
-        else if action == glfw.RELEASE do Breakout.keys[key] = false
+        if action == glfw.PRESS do _breakout.keys[key] = true
+        else if action == glfw.RELEASE do _breakout.keys[key] = false
     }
-}
-
-init :: proc()
-{
-    projection := linalg.matrix_ortho3d(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, -1, 1)
-
-    rm_create_shader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag", "sprite")
-    sprite_shader := rm_get_shader("sprite")
-    use_shader(sprite_shader)
-
-    shader_set_int(sprite_shader, "image", 0)
-    shader_set_mat4(sprite_shader, "projection", projection)
-
-    Renderer = create_sprite_renderer(sprite_shader)
-    rm_create_texture2d("assets/images/awesomeface.png", true, "face")
 }

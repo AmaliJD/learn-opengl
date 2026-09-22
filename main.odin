@@ -33,7 +33,7 @@ main :: proc()
     glfw.SetKeyCallback(window, key_callback)
     glfw.SetCursorPosCallback(window, mouse_callback)
     glfw.SetScrollCallback(window, scroll_callback)
-    glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
+    //glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
     // opengl
     gl.load_up_to(3, 3, glfw.gl_set_proc_address)

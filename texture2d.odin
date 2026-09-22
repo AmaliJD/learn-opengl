@@ -51,7 +51,7 @@ create_texture2d :: proc(path: cstring, alpha: bool) -> Texture2D
     data := stbi.load(path, &width, &height, &nr_channels, 0)
     if data == nil
     {
-        fmt.printf("Error loading image data\n")
+        fmt.printf("Error loading image data from path: %s\n", path)
         stbi.image_free(data)
         return texture
     }
