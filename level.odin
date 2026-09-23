@@ -119,13 +119,13 @@ load_level :: proc(level: ^Level, path: string, width, height: u32)
     }
 }
 
-draw_level :: proc(level: ^Level, sp: Sprite_Renderer)
+draw_level :: proc(level: ^Level)
 {
     for tile in level.bricks
     {
         if !tile.destroyed
         {
-            draw_gameobject(tile, sp)
+            draw_gameobject(tile)
         }
     }
 }

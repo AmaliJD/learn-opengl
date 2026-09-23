@@ -38,6 +38,10 @@ create_game :: proc(width, height: u32) -> Game
     }
 }
 
+player: Game_Object
+PLAYER_VELOCITY :: f32(500)
+PLAYER_SIZE :: vec2{100, 20}
+
 init_game :: proc(game: ^Game)
 {
     projection := linalg.matrix_ortho3d(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, -1, 1)
@@ -49,13 +53,14 @@ init_game :: proc(game: ^Game)
     shader_set_int(sprite_shader, "image", 0)
     shader_set_mat4(sprite_shader, "projection", projection)
 
-    _sp = create_sprite_renderer(sprite_shader)
+    sp = create_sprite_renderer(sprite_shader)
 
     // load textures
     rm_create_texture2d("assets/images/awesomeface.png", true, "face")
     rm_create_texture2d("assets/images/background.jpg", false, "background")
     rm_create_texture2d("assets/images/block.png", false, "block")
     rm_create_texture2d("assets/images/block_solid.png", false, "block_solid")
+    rm_create_texture2d("assets/images/paddle.png", true, "paddle")
 
     // load levels
     one := create_and_load_level("assets/levels/one.lvl", game.width, game.height / 2)
@@ -67,6 +72,13 @@ init_game :: proc(game: ^Game)
     append(&game.levels, two)
     append(&game.levels, three)
     append(&game.levels, four)
+
+    // setup player
+    player_pos := vec2{
+        f32(game.width) / 2 - PLAYER_SIZE.x / 2,
+        f32(game.height) - PLAYER_SIZE.y
+    }
+    player = create_gameobject(player_pos, PLAYER_SIZE, rm_get_texture2d("paddle"))
 }
 
 update :: proc(game: ^Game, dt: f64)
@@ -76,15 +88,34 @@ update :: proc(game: ^Game, dt: f64)
 
 input :: proc(game: ^Game, window: glfw.WindowHandle, dt: f64)
 {
-    
+    if game.state == .Active
+    {
+        velocity := PLAYER_VELOCITY * f32(dt)
+
+        if game.keys[glfw.KEY_A] || game.keys[glfw.KEY_LEFT]
+        {
+            if player.position.x >= 0
+            {
+                player.position.x -= velocity
+            }
+        }
+        if game.keys[glfw.KEY_D] || game.keys[glfw.KEY_RIGHT]
+        {
+            if player.position.x <= f32(game.width) - player.size.x
+            {
+                player.position.x += velocity
+            }
+        }
+    }
 }
 
 render :: proc(game: ^Game)
 {
     if game.state == .Active
     {
-        draw_sprite(_sp, rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
+        draw_sprite(rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
     }
 
-    draw_level(&game.levels[game.level], _sp)
+    draw_level(&game.levels[game.level])
+    draw_gameobject(player)
 }

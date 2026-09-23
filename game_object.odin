@@ -55,7 +55,7 @@ create_gameobject_params :: proc(pos, size: vec2, sprite: Texture2D, color := ve
     return go
 }
 
-draw_gameobject :: proc(go: Game_Object, sp: Sprite_Renderer)
+draw_gameobject :: proc(go: Game_Object)
 {
-    draw_sprite(sp, go.sprite, go.position, go.size, go.rotation, go.color)
+    draw_sprite(go.sprite, go.position, go.size, go.rotation, go.color)
 }

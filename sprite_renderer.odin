@@ -57,7 +57,7 @@ destroy_sprite_renderer :: proc(sp: ^Sprite_Renderer)
     gl.DeleteVertexArrays(1, &sp.quad_VAO)
 }
 
-draw_sprite :: proc(sp: Sprite_Renderer, texture: Texture2D, position: vec2, size := vec2{10, 10}, rotate :f32= 0, color := vec3{1,1,1})
+draw_sprite :: proc(texture: Texture2D, position: vec2, size := vec2{10, 10}, rotate :f32= 0, color := vec3{1,1,1})
 {
     use_shader(sp.shader)
 

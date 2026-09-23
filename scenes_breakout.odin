@@ -14,7 +14,7 @@ import stbi "vendor:stb/image"
 import tt "vendor:stb/truetype"
 
 _breakout: Game
-_sp: Sprite_Renderer
+sp: Sprite_Renderer
 
 breakout_scene :: proc(window: glfw.WindowHandle)
 {
