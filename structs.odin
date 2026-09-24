@@ -4,6 +4,17 @@ vec2 :: [2]f32
 vec3 :: [3]f32
 vec4 :: [4]f32
 
+create_vec2 :: proc
+{
+    create_vec2_x
+}
+
+@(private="file")
+create_vec2_x :: proc(x: f32) -> vec2
+{
+    return vec2{x, x}
+}
+
 create_vec3 :: proc
 {
     create_vec3_xy_z

@@ -15,7 +15,7 @@ import stbi "vendor:stb/image"
 
 Level :: struct
 {
-    bricks: [dynamic]Game_Object,
+    bricks: [dynamic]GameObject,
 }
 
 create_and_load_level :: proc(path: string, width, height: u32) -> Level
