@@ -60,12 +60,19 @@ init_game :: proc(game: ^Game)
 {
     projection := linalg.matrix_ortho3d(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, -1, 1)
 
+    // Load shaders
     rm_create_shader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag", "sprite")
+    rm_create_shader("assets/shaders/particles.vert", "assets/shaders/particles.frag", "particle")
     sprite_shader := rm_get_shader("sprite")
-    use_shader(sprite_shader)
+    particle_shader := rm_get_shader("particle")
 
+    use_shader(sprite_shader)
     shader_set_int(sprite_shader, "image", 0)
     shader_set_mat4(sprite_shader, "projection", projection)
+
+    use_shader(particle_shader)
+    shader_set_int(particle_shader, "sprite", 0)
+    shader_set_mat4(particle_shader, "projection", projection)
 
     sp = create_sprite_renderer(sprite_shader)
 
@@ -75,6 +82,7 @@ init_game :: proc(game: ^Game)
     rm_create_texture2d("assets/images/block.png", false, "block")
     rm_create_texture2d("assets/images/block_solid.png", false, "block_solid")
     rm_create_texture2d("assets/images/paddle.png", true, "paddle")
+    rm_create_texture2d("assets/images/particle.png", true, "particle")
 
     // load levels
     one := create_and_load_level("assets/levels/one.lvl", game.width, game.height / 2)
@@ -100,12 +108,16 @@ init_game :: proc(game: ^Game)
         -BALL_RADIUS * 2
     }
     ball = create_gameobject_ball(ball_pos, BALL_RADIUS, INITIAL_BALL_VELOCITY, rm_get_texture2d("face"))
+
+    // setup particles
+    pg = create_particle_generator(particle_shader, rm_get_texture2d("particle"), 500)
 }
 
 update :: proc(game: ^Game, dt: f64)
 {
     move_ball(&ball, dt, game.width)
     check_all_collisions(game)
+    update_particles(dt, &ball, 1, create_vec2(ball.radius / 2))
 }
 
 input :: proc(game: ^Game, window: glfw.WindowHandle, dt: f64)
@@ -144,6 +156,7 @@ render :: proc(game: ^Game)
         draw_sprite(rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
         draw_level(&game.levels[game.level])
         draw_gameobject(player)
+        draw_particles()
         draw_gameobject(ball)
     }
 }
