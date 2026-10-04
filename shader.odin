@@ -82,21 +82,35 @@ use_shader :: proc(shader: Shader)
 
 // -------------------------------------------------------------------------------------------------- set uniform parameters
 
+// --------------------------------------------------------------------------------------------- bool
 shader_set_bool :: proc(shader: Shader, name: cstring, value: bool)
 {
     gl.Uniform1i(gl.GetUniformLocation(shader, name), i32(value))
 }
 
+// --------------------------------------------------------------------------------------------- int
 shader_set_int :: proc(shader: Shader, name: cstring, value: i32)
 {
     gl.Uniform1i(gl.GetUniformLocation(shader, name), value)
 }
 
+shader_set_int_array :: proc(shader: Shader, name: cstring, array_slc: []i32)
+{
+    gl.Uniform1iv(gl.GetUniformLocation(shader, name), i32(len(array_slc)), &array_slc[0])
+}
+
+// --------------------------------------------------------------------------------------------- float
 shader_set_float :: proc(shader: Shader, name: cstring, value: f32)
 {
     gl.Uniform1f(gl.GetUniformLocation(shader, name), value)
 }
 
+shader_set_float_array :: proc(shader: Shader, name: cstring, array_slc: []f32)
+{
+    gl.Uniform1fv(gl.GetUniformLocation(shader, name), i32(len(array_slc)), &array_slc[0])
+}
+
+// --------------------------------------------------------------------------------------------- mat4
 shader_set_mat4 :: proc(shader: Shader, name: cstring, value: matrix[4, 4]f32)
 {
     value_addressable := value
@@ -104,26 +118,33 @@ shader_set_mat4 :: proc(shader: Shader, name: cstring, value: matrix[4, 4]f32)
 }
 
 
+// --------------------------------------------------------------------------------------------- vec2
 shader_set_vec2 :: proc
 {
     shader_set_vec2_2f,
     shader_set_vec2_2fv,
 }
 
-@private
+@(private="file")
 shader_set_vec2_2f :: proc(shader: Shader, name: cstring, x, y: f32)
 {
     gl.Uniform2f(gl.GetUniformLocation(shader, name), x, y)
 }
 
-@private
+@(private="file")
 shader_set_vec2_2fv :: proc(shader: Shader, name: cstring, value: vec2)
 {
     value_addressable := value
     gl.Uniform2fv(gl.GetUniformLocation(shader, name), 1, &value_addressable[0])
 }
 
+shader_set_vec2_array :: proc(shader: Shader, name: cstring, array_slc: [][2]f32)
+{
+    gl.Uniform2fv(gl.GetUniformLocation(shader, name), i32(len(array_slc)), &array_slc[0][0])
+}
 
+
+// --------------------------------------------------------------------------------------------- vec3
 shader_set_vec3 :: proc
 {
     shader_set_vec3_3f,
@@ -144,6 +165,7 @@ shader_set_vec3_3fv :: proc(shader: Shader, name: cstring, value: vec3)
 }
 
 
+// --------------------------------------------------------------------------------------------- vec4
 shader_set_vec4 :: proc
 {
     shader_set_vec4_4f,

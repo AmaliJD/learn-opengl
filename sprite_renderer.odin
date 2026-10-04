@@ -19,6 +19,8 @@ Sprite_Renderer :: struct
     quad_VAO: u32,
 }
 
+sp: Sprite_Renderer
+
 create_sprite_renderer :: proc(shader: Shader) -> Sprite_Renderer
 {
     sp: Sprite_Renderer

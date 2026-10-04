@@ -16,6 +16,7 @@ lighting_scene :: proc(window: glfw.WindowHandle)
 {
     //cam = create_camera(vec3{0, 0, 3})
 
+    glfw.SetInputMode(window, glfw.CURSOR, glfw.CURSOR_DISABLED)
     gl.Enable(gl.DEPTH_TEST)
 
     // shader

@@ -46,6 +46,8 @@ Particle_Generator :: struct
     VAO: u32
 }
 
+pg: Particle_Generator
+
 create_particle_generator :: proc(shader: Shader, texture: Texture2D, count: u32) -> Particle_Generator
 {
     particle_generator: Particle_Generator

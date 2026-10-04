@@ -22,6 +22,7 @@ main :: proc()
     glfw.WindowHint(glfw.CONTEXT_VERSION_MAJOR, 3)
     glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 3)
     glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+    //glfw.WindowHint(glfw.SAMPLES, 4)
 
     window := glfw.CreateWindow(i32(SCREEN_WIDTH), i32(SCREEN_HEIGHT), "Learn OpenGL", nil, nil)
     if window == nil {
@@ -38,6 +39,7 @@ main :: proc()
     // opengl
     gl.load_up_to(3, 3, glfw.gl_set_proc_address)
     glfw.SetFramebufferSizeCallback(window, framebuffer_size_callback)
+    //gl.Enable(gl.MULTISAMPLE)
     
     // render loop
     render_loop(window)

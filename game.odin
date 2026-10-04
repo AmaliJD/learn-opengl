@@ -27,8 +27,6 @@ Direction :: enum
     Up, Right, Down, Left
 }
 
-pg: Particle_Generator
-
 // ----------------------------------------------------------------------------------------------------------- game class
 Game :: struct
 {
