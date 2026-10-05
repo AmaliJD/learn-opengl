@@ -33,31 +33,31 @@ pp: Post_Processor
 
 create_post_processor :: proc(shader: Shader, width, height: i32) -> Post_Processor
 {
-    _pp: Post_Processor
+    post_processor: Post_Processor
 
-    _pp.shader = shader
-    _pp.width = width
-    _pp.height = height
+    post_processor.shader = shader
+    post_processor.width = width
+    post_processor.height = height
 
     // initialize renderbuffer/framebuffer object
-    gl.GenFramebuffers(1, &_pp.MSFBO)
-    gl.GenFramebuffers(1, &_pp.FBO)
-    gl.GenRenderbuffers(1, &_pp.RBO)
+    gl.GenFramebuffers(1, &post_processor.MSFBO)
+    gl.GenFramebuffers(1, &post_processor.FBO)
+    gl.GenRenderbuffers(1, &post_processor.RBO)
 
     // initialize renderbuffer storage with a multisampled color buffer (don't need a depth/stencil buffer)
-    gl.BindFramebuffer(gl.FRAMEBUFFER, pp.MSFBO)
-    gl.BindRenderbuffer(gl.RENDERBUFFER, pp.RBO)
+    gl.BindFramebuffer(gl.FRAMEBUFFER, post_processor.MSFBO)
+    gl.BindRenderbuffer(gl.RENDERBUFFER, post_processor.RBO)
     gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGB, width, height)
-    gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, _pp.RBO)
+    gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, post_processor.RBO)
     if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE
     {
         fmt.printfln("Error: create_post_processor() - Failed to initialize MSFBO")
     }
 
     // also initialize the FBO/texture to blit multisampled color-buffer to; used for shader operations (for postprocessing effects)
-    gl.BindFramebuffer(gl.FRAMEBUFFER, _pp.FBO)
-    _pp.texture = create_texture2d(width, height)
-    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, _pp.texture.id, 0) // attach texture to framebuffer as its color attachment
+    gl.BindFramebuffer(gl.FRAMEBUFFER, post_processor.FBO)
+    post_processor.texture = create_texture2d(width, height)
+    gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, post_processor.texture.id, 0) // attach texture to framebuffer as its color attachment
     if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE
     {
         fmt.printfln("Error: create_post_processor() - Failed to initialize FBO")
@@ -78,11 +78,11 @@ create_post_processor :: proc(shader: Shader, width, height: i32) -> Post_Proces
          1.0,  1.0, 1.0, 1.0,
     }
 
-    gl.GenVertexArrays(1, &_pp.VAO)
+    gl.GenVertexArrays(1, &post_processor.VAO)
     gl.GenBuffers(1, &VBO)
     gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
     gl.BufferData(gl.ARRAY_BUFFER, len(vertices) * size_of(f32), &vertices[0], gl.STATIC_DRAW)
-    gl.BindVertexArray(_pp.VAO)
+    gl.BindVertexArray(post_processor.VAO)
     gl.EnableVertexAttribArray(0)
     gl.VertexAttribPointer(0, 4, gl.FLOAT, gl.FALSE, 4 * size_of(f32), uintptr(0))
     gl.BindBuffer(gl.ARRAY_BUFFER, 0)
@@ -91,7 +91,7 @@ create_post_processor :: proc(shader: Shader, width, height: i32) -> Post_Proces
     // --------------------------- set uniforms
     use_shader(shader)
     shader_set_int(shader, "scene", 0)
-    offset: f32 = 1 / 300
+    offset: f32 = 1.0 / 300.0
     offsets: [9][2]f32 = {
         { -offset,   offset  },  // top-left
         {  0,        offset  },  // top-center
@@ -113,13 +113,13 @@ create_post_processor :: proc(shader: Shader, width, height: i32) -> Post_Proces
     shader_set_int_array(shader, "edge_kernel", edge_kernel[:])
 
     blur_kernel := [9]f32{
-        1/16, 2/16, 1/16,
-        2/16, 4/16, 2/16,
-        1/16, 2/16, 1/16,
+        1.0/16.0, 2.0/16.0, 1/16.0,
+        2.0/16.0, 4.0/16.0, 2/16.0,
+        1.0/16.0, 2.0/16.0, 1/16.0,
     }
     shader_set_float_array(shader, "blur_kernel", blur_kernel[:])
 
-    return _pp
+    return post_processor
 }
 
 pp_begin_render :: proc()
@@ -137,10 +137,10 @@ pp_end_render :: proc()
     gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
-pp_render :: proc(dt: f64)
+pp_render :: proc(time: f64)
 {
     use_shader(pp.shader)
-    shader_set_float(pp.shader, "time", f32(dt))
+    shader_set_float(pp.shader, "time", f32(time))
     shader_set_bool(pp.shader, "confuse", pp.confuse)
     shader_set_bool(pp.shader, "chaos", pp.chaos)
     shader_set_bool(pp.shader, "shake", pp.shake)

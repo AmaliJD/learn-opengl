@@ -27,6 +27,8 @@ Direction :: enum
     Up, Right, Down, Left
 }
 
+shake_time: f64
+
 // ----------------------------------------------------------------------------------------------------------- game class
 Game :: struct
 {
@@ -61,8 +63,10 @@ init_game :: proc(game: ^Game)
     // Load shaders
     rm_create_shader("assets/shaders/sprite.vert", "assets/shaders/sprite.frag", "sprite")
     rm_create_shader("assets/shaders/particles.vert", "assets/shaders/particles.frag", "particle")
+    rm_create_shader("assets/shaders/post_processing.vert", "assets/shaders/post_processing.frag", "postprocessing")
     sprite_shader := rm_get_shader("sprite")
     particle_shader := rm_get_shader("particle")
+    post_processing_shader := rm_get_shader("postprocessing")
 
     use_shader(sprite_shader)
     shader_set_int(sprite_shader, "image", 0)
@@ -109,6 +113,9 @@ init_game :: proc(game: ^Game)
 
     // setup particles
     pg = create_particle_generator(particle_shader, rm_get_texture2d("particle"), 500)
+
+    // setup post processing
+    pp = create_post_processor(post_processing_shader, i32(game.width), i32(game.height))
 }
 
 update :: proc(game: ^Game, dt: f64)
@@ -116,6 +123,15 @@ update :: proc(game: ^Game, dt: f64)
     move_ball(&ball, dt, game.width)
     check_all_collisions(game)
     update_particles(dt, &ball, 1, create_vec2(ball.radius / 2))
+
+    if shake_time > 0
+    {
+        shake_time -= dt
+        if shake_time <= 0
+        {
+            pp.shake = false
+        }
+    }
 }
 
 input :: proc(game: ^Game, window: glfw.WindowHandle, dt: f64)
@@ -151,11 +167,16 @@ render :: proc(game: ^Game)
 {
     if game.state == .Active
     {
+        pp_begin_render()
+
         draw_sprite(rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
         draw_level(&game.levels[game.level])
         draw_gameobject(player)
         draw_particles()
         draw_gameobject(ball)
+
+        pp_end_render()
+        pp_render(glfw.GetTime())
     }
 }
 
@@ -174,6 +195,13 @@ check_all_collisions :: proc(game: ^Game)
                 if !brick.solid
                 {
                     brick.destroyed = true
+                    shake_time = 0.05
+                    pp.shake = true
+                }
+                else
+                {
+                    shake_time = 0.05
+                    pp.shake = true
                 }
                 
                 if collision_direction == .Left || collision_direction == .Right
