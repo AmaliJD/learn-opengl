@@ -47,7 +47,7 @@ create_powerup :: proc(type: Powerup_Type, color: vec3, duration: f64, position:
 
 spawn_powerups :: proc(powerups: ^[dynamic]Powerup, block: GameObject)
 {
-    if powerup_spawn_true(60)
+    if powerup_spawn_true(50)
     {
         append(powerups, create_powerup(.Speed, vec3{.5,.5,1}, 0, block.position, rm_get_texture2d("powerup_speed")))
     }
@@ -62,7 +62,7 @@ spawn_powerups :: proc(powerups: ^[dynamic]Powerup, block: GameObject)
         append(powerups, create_powerup(.Pass_Through, vec3{.5,1,.5}, 10, block.position, rm_get_texture2d("powerup_pass")))
     }
 
-    if powerup_spawn_true(75)
+    if powerup_spawn_true(60)
     {
         append(powerups, create_powerup(.Size_Up, vec3{1,.6,.4}, 0, block.position, rm_get_texture2d("powerup_size")))
     }
