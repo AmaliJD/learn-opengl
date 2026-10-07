@@ -17,6 +17,9 @@ Ball_GameObject :: struct
     using gameobject: GameObject,
     radius: f32,
     stuck: bool,
+    
+    sticky: bool,
+    pass_through: bool,
 }
 
 create_gameobject_ball :: proc

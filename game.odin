@@ -37,7 +37,9 @@ Game :: struct
     width, height: u32,
 
     levels: [dynamic]Level,
-    level: u32
+    level: u32,
+
+    powerups: [dynamic]Powerup,
 }
 
 Game_State :: enum
@@ -85,6 +87,12 @@ init_game :: proc(game: ^Game)
     rm_create_texture2d("assets/images/block_solid.png", false, "block_solid")
     rm_create_texture2d("assets/images/paddle.png", true, "paddle")
     rm_create_texture2d("assets/images/particle.png", true, "particle")
+    rm_create_texture2d("assets/images/powerup_speed.png", true, "powerup_speed")
+    rm_create_texture2d("assets/images/powerup_sticky.png", true, "powerup_sticky")
+    rm_create_texture2d("assets/images/powerup_increase.png", true, "powerup_size")
+    rm_create_texture2d("assets/images/powerup_passthrough.png", true, "powerup_pass")
+    rm_create_texture2d("assets/images/powerup_confuse.png", true, "powerup_confuse")
+    rm_create_texture2d("assets/images/powerup_chaos.png", true, "powerup_chaos")
 
     // load levels
     one := create_and_load_level("assets/levels/one.lvl", game.width, game.height / 2)
@@ -123,6 +131,7 @@ update :: proc(game: ^Game, dt: f64)
     move_ball(&ball, dt, game.width)
     check_all_collisions(game)
     update_particles(dt, &ball, 1, create_vec2(ball.radius / 2))
+    update_powerups(&game.powerups, dt)
 
     if shake_time > 0
     {
@@ -174,6 +183,7 @@ render :: proc(game: ^Game)
         draw_gameobject(player)
         draw_particles()
         draw_gameobject(ball)
+        draw_powerups(game.powerups[:])
 
         pp_end_render()
         pp_render(glfw.GetTime())
@@ -197,6 +207,8 @@ check_all_collisions :: proc(game: ^Game)
                     brick.destroyed = true
                     shake_time = 0.05
                     pp.shake = true
+
+                    spawn_powerups(&game.powerups, brick)
                 }
                 else
                 {
@@ -204,19 +216,22 @@ check_all_collisions :: proc(game: ^Game)
                     pp.shake = true
                 }
                 
-                if collision_direction == .Left || collision_direction == .Right
+                if !ball.pass_through && !ball.solid // resolve collision
                 {
-                    ball.velocity.x = -ball.velocity.x
+                    if collision_direction == .Left || collision_direction == .Right
+                    {
+                        ball.velocity.x = -ball.velocity.x
 
-                    penetration := ball.radius - displacement.x
-                    ball.position.x += collision_direction == .Left ? penetration : -penetration
-                }
-                else
-                {
-                    ball.velocity.y = -ball.velocity.y
+                        penetration := ball.radius - displacement.x
+                        ball.position.x += collision_direction == .Left ? penetration : -penetration
+                    }
+                    else
+                    {
+                        ball.velocity.y = -ball.velocity.y
 
-                    penetration := ball.radius - displacement.y
-                    ball.position.y += collision_direction == .Down ? penetration : -penetration
+                        penetration := ball.radius - displacement.y
+                        ball.position.y += collision_direction == .Down ? penetration : -penetration
+                    }
                 }
             }
         }
@@ -235,6 +250,11 @@ check_all_collisions :: proc(game: ^Game)
         ball.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength
         ball.velocity.y = -math.abs(ball.velocity.y)
         ball.velocity = linalg.normalize(ball.velocity) * linalg.length(prev_velocity)
+
+        if !ball.stuck
+        {
+            ball.stuck = ball.sticky
+        }
     }
 
     // ball bottom edge collision
@@ -242,6 +262,25 @@ check_all_collisions :: proc(game: ^Game)
     {
         reset_level(game)
         reset_player(game)
+    }
+
+    // paddle powerup collisions
+    for &powerup in game.powerups
+    {
+        if !powerup.destroyed
+        {
+            if powerup.position.y >= f32(game.height)
+            {
+                powerup.destroyed = true
+            }
+
+            if check_collision(powerup, player)
+            {
+                activate_powerup(&powerup)
+                powerup.destroyed = true
+                powerup.activated = true
+            }
+        }
     }
 }
 
@@ -299,4 +338,9 @@ reset_player :: proc(game: ^Game)
         },
         INITIAL_BALL_VELOCITY,
     )
+
+    pp.chaos = false
+    pp.confuse = false
+    player.color = create_vec3(1)
+    ball.color = create_vec3(1)
 }
