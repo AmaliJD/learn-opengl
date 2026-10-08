@@ -46,6 +46,8 @@ breakout_scene :: proc(window: glfw.WindowHandle)
         // end
         glfw.SwapBuffers(window)
     }
+
+    destroy_audio_engine(&audio_engine)
 }
 
 key_callback_breakout :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mods: i32)

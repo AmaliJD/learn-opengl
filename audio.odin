@@ -26,7 +26,6 @@ audio_engine: Audio_Engine
 
 
 // -------------------------------------------------------------------------------------------------- create / destroy
-
 create_audio_engine :: proc() -> Audio_Engine
 {
     ae: Audio_Engine
@@ -52,9 +51,14 @@ destroy_audio_engine :: proc(ae: ^Audio_Engine)
 {
     for name, &sound in ae.managed_sounds
     {
-        remove_sound(name)
+        stop_sound(name)
+        remove_sound(name, true)
     }
+    
+    clear(&audio_engine.managed_sounds)
+    clear(&audio_engine.one_shot_sounds)
 
+    ma.engine_uninit(ae.engine)
     free(ae.engine)
 }
 
@@ -76,13 +80,13 @@ add_sound :: proc(path: cstring, name: string)
     audio_engine.managed_sounds[name] = sound
 }
 
-remove_sound :: proc(name: string)
+remove_sound :: proc(name: string, keep_sound_struct := false)
 {
     sound := audio_engine.managed_sounds[name]
     ma.sound_uninit(sound)
     free(sound)
 
-    delete_key(&audio_engine.managed_sounds, name)
+    if !keep_sound_struct do delete_key(&audio_engine.managed_sounds, name)
 }
 
 play_sound :: proc(name: string, loop :b32= false)
@@ -105,6 +109,7 @@ set_sound_loop :: proc(name: string, loop: b32)
 {
     ma.sound_set_looping(audio_engine.managed_sounds[name], loop)
 }
+
 
 // -------------------------------------------------------------------------------------------------- one shot sounds
 add_sound_one_shot :: proc(path: cstring, name: string)
