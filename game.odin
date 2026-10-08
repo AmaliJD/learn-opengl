@@ -363,6 +363,7 @@ reset_player :: proc(game: ^Game)
     player.color = create_vec3(1)
     ball.color = create_vec3(1)
     ball.pass_through = false
+    ball.sticky = false
 
     clear(&game.powerups)
 }
