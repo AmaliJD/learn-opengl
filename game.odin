@@ -11,6 +11,7 @@ import "vendor:glfw"
 import gl "vendor:OpenGL"
 import "glx"
 import stbi "vendor:stb/image"
+import "vendor:miniaudio"
 
 
 // ----------------------------------------------------------------------------------------------------------- game data
@@ -124,6 +125,15 @@ init_game :: proc(game: ^Game)
 
     // setup post processing
     pp = create_post_processor(post_processing_shader, i32(game.width), i32(game.height))
+
+    // setup audio
+    audio_engine = create_audio_engine()
+    add_sound("assets/audio/breakout.mp3", "bg")
+    add_sound_one_shot("assets/audio/bleep.mp3", "brick")
+    add_sound_one_shot("assets/audio/solid.wav", "solid")
+    add_sound_one_shot("assets/audio/powerup.wav", "powerup")
+    add_sound_one_shot("assets/audio/bleep.wav", "paddle")
+    play_sound("bg", true)
 }
 
 update :: proc(game: ^Game, dt: f64)
@@ -209,11 +219,17 @@ check_all_collisions :: proc(game: ^Game)
                     pp.shake = true
 
                     spawn_powerups(&game.powerups, brick)
+                    play_sound_one_shot("brick")
                 }
                 else
                 {
                     shake_time = 0.05
                     pp.shake = true
+
+                    if !powerups_contains_activated_of_type(game.powerups[:], .Pass_Through)
+                    {
+                        play_sound_one_shot("solid")
+                    }
                 }
                 
                 if !ball.pass_through && !ball.solid // resolve collision
@@ -255,6 +271,8 @@ check_all_collisions :: proc(game: ^Game)
         {
             ball.stuck = ball.sticky
         }
+
+        play_sound_one_shot("paddle")
     }
 
     // ball bottom edge collision
@@ -279,6 +297,7 @@ check_all_collisions :: proc(game: ^Game)
                 activate_powerup(&powerup)
                 powerup.destroyed = true
                 powerup.activated = true
+                play_sound_one_shot("powerup")
             }
         }
     }
@@ -343,4 +362,7 @@ reset_player :: proc(game: ^Game)
     pp.confuse = false
     player.color = create_vec3(1)
     ball.color = create_vec3(1)
+    ball.pass_through = false
+
+    clear(&game.powerups)
 }

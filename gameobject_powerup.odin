@@ -47,19 +47,19 @@ create_powerup :: proc(type: Powerup_Type, color: vec3, duration: f64, position:
 
 spawn_powerups :: proc(powerups: ^[dynamic]Powerup, block: GameObject)
 {
-    if powerup_spawn_true(50)
+    if powerup_spawn_true(25)
     {
         append(powerups, create_powerup(.Speed, vec3{.5,.5,1}, 0, block.position, rm_get_texture2d("powerup_speed")))
     }
 
-    if powerup_spawn_true(75)
+    if powerup_spawn_true(40)
     {
-        append(powerups, create_powerup(.Sticky, vec3{1,.5,1}, 20, block.position, rm_get_texture2d("powerup_sticky")))
+        append(powerups, create_powerup(.Sticky, vec3{1,.5,1}, 8, block.position, rm_get_texture2d("powerup_sticky")))
     }
 
-    if powerup_spawn_true(75)
+    if powerup_spawn_true(50)
     {
-        append(powerups, create_powerup(.Pass_Through, vec3{.5,1,.5}, 10, block.position, rm_get_texture2d("powerup_pass")))
+        append(powerups, create_powerup(.Pass_Through, vec3{.5,1,.5}, 5, block.position, rm_get_texture2d("powerup_pass")))
     }
 
     if powerup_spawn_true(60)
@@ -69,12 +69,12 @@ spawn_powerups :: proc(powerups: ^[dynamic]Powerup, block: GameObject)
 
     if powerup_spawn_true(50)
     {
-        append(powerups, create_powerup(.Confuse, vec3{1,.3,.3}, 5, block.position, rm_get_texture2d("powerup_confuse")))
+        append(powerups, create_powerup(.Confuse, vec3{1,.3,.3}, 8, block.position, rm_get_texture2d("powerup_confuse")))
     }
 
     if powerup_spawn_true(30)
     {
-        append(powerups, create_powerup(.Chaos, vec3{.9,.25,.25}, 15, block.position, rm_get_texture2d("powerup_chaos")))
+        append(powerups, create_powerup(.Chaos, vec3{.9,.25,.25}, 8, block.position, rm_get_texture2d("powerup_chaos")))
     }
 }
 
