@@ -4,6 +4,7 @@ import "core:fmt"
 import "base:runtime"
 import "core:os"
 import "core:strings"
+import "core:strconv"
 import "core:math"
 import "core:math/linalg"
 
@@ -35,12 +36,15 @@ Game :: struct
 {
     state: Game_State,
     keys: [1024]bool,
+    keys_proccessed: [1024]bool,
     width, height: u32,
 
     levels: [dynamic]Level,
-    level: u32,
+    level: i32,
 
     powerups: [dynamic]Powerup,
+
+    lives: i32,
 }
 
 Game_State :: enum
@@ -52,13 +56,18 @@ Game_State :: enum
 
 create_game :: proc(width, height: u32) -> Game
 {
-    return Game {
-        state = .Active,
+    game := Game {
+        state = .Menu,
         width = width,
         height = height,
     }
+
+    init_game(&game)
+
+    return game
 }
 
+@(private="file")
 init_game :: proc(game: ^Game)
 {
     projection := linalg.matrix_ortho3d(0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, -1, 1)
@@ -134,6 +143,11 @@ init_game :: proc(game: ^Game)
     add_sound_one_shot("assets/audio/powerup.wav", "powerup")
     add_sound_one_shot("assets/audio/bleep.wav", "paddle")
     play_sound("bg", true)
+
+    // text renderer
+    tr = create_text_renderer(game.width, game.height)
+    tr_load_font("assets/fonts/OCRAEXT.TTF", 24)
+    game.lives = 3
 }
 
 update :: proc(game: ^Game, dt: f64)
@@ -151,52 +165,106 @@ update :: proc(game: ^Game, dt: f64)
             pp.shake = false
         }
     }
+
+    if game.state == .Active && is_level_completed(&game.levels[game.level])
+    {
+        reset_level(game)
+        reset_player(game)
+        pp.chaos = true
+        game.state = .Win
+    }
 }
 
 input :: proc(game: ^Game, window: glfw.WindowHandle, dt: f64)
 {
-    if game.state == .Active
+    #partial switch game.state
     {
-        velocity := PLAYER_VELOCITY * f32(dt)
+        case .Active:
+            velocity := PLAYER_VELOCITY * f32(dt)
 
-        if game.keys[glfw.KEY_A] || game.keys[glfw.KEY_LEFT]
-        {
-            if player.position.x >= 0
+            if game.keys[glfw.KEY_A] || game.keys[glfw.KEY_LEFT]
             {
-                player.position.x -= velocity
-                if ball.stuck do ball.position.x -= velocity
+                if player.position.x >= 0
+                {
+                    player.position.x -= velocity
+                    if ball.stuck do ball.position.x -= velocity
+                }
             }
-        }
-        if game.keys[glfw.KEY_D] || game.keys[glfw.KEY_RIGHT]
-        {
-            if player.position.x <= f32(game.width) - player.size.x
+            if game.keys[glfw.KEY_D] || game.keys[glfw.KEY_RIGHT]
             {
-                player.position.x += velocity
-                if ball.stuck do ball.position.x += velocity
+                if player.position.x <= f32(game.width) - player.size.x
+                {
+                    player.position.x += velocity
+                    if ball.stuck do ball.position.x += velocity
+                }
             }
-        }
-        if game.keys[glfw.KEY_SPACE]
-        {
-            ball.stuck = false
-        }
+            if (game.keys[glfw.KEY_SPACE] && !game.keys_proccessed[glfw.KEY_SPACE]) || (game.keys[glfw.KEY_ENTER] && !game.keys_proccessed[glfw.KEY_ENTER])
+            {
+                ball.stuck = false
+            }
+            if game.keys[glfw.KEY_ESCAPE]
+            {
+                game.state = .Menu
+                reset_level(game)
+                reset_player(game)
+            }
+
+        case .Menu:
+            if (game.keys[glfw.KEY_ENTER] && !game.keys_proccessed[glfw.KEY_ENTER]) || (game.keys[glfw.KEY_SPACE] && !game.keys_proccessed[glfw.KEY_SPACE])
+            {
+                game.state = .Active
+                if game.keys[glfw.KEY_ENTER] do game.keys_proccessed[glfw.KEY_ENTER] = true
+                if game.keys[glfw.KEY_SPACE] do game.keys_proccessed[glfw.KEY_SPACE] = true
+            }
+            if (game.keys[glfw.KEY_W] && !game.keys_proccessed[glfw.KEY_W]) || (game.keys[glfw.KEY_UP] && !game.keys_proccessed[glfw.KEY_UP])
+            {
+                game.level = (game.level + 1) %% i32(len(game.levels))
+                if game.keys[glfw.KEY_W] do game.keys_proccessed[glfw.KEY_W] = true
+                if game.keys[glfw.KEY_UP] do game.keys_proccessed[glfw.KEY_UP] = true
+            }
+            if (game.keys[glfw.KEY_S] && !game.keys_proccessed[glfw.KEY_S]) || (game.keys[glfw.KEY_DOWN] && !game.keys_proccessed[glfw.KEY_DOWN])
+            {
+                game.level = (game.level - 1) %% i32(len(game.levels))
+                if game.keys[glfw.KEY_S] do game.keys_proccessed[glfw.KEY_S] = true
+                if game.keys[glfw.KEY_DOWN] do game.keys_proccessed[glfw.KEY_DOWN] = true
+            }
+
+        case .Win:
+            if (game.keys[glfw.KEY_ENTER] || game.keys[glfw.KEY_SPACE])
+            {
+                if game.keys[glfw.KEY_ENTER] do game.keys_proccessed[glfw.KEY_ENTER] = true
+                if game.keys[glfw.KEY_SPACE] do game.keys_proccessed[glfw.KEY_SPACE] = true
+                pp.chaos = false
+                game.state = .Menu
+            }
     }
 }
 
 render :: proc(game: ^Game)
 {
-    if game.state == .Active
+    pp_begin_render()
+
+    draw_sprite(rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
+    draw_level(&game.levels[game.level])
+    draw_gameobject(player)
+    draw_particles()
+    draw_gameobject(ball)
+    draw_powerups(game.powerups[:])
+
+    pp_end_render()
+    pp_render(glfw.GetTime())
+
+    tr_render_text(fmt.tprintf("Lives: %d", game.lives), 5, 5, 1)
+
+    if game.state == .Menu
     {
-        pp_begin_render()
-
-        draw_sprite(rm_get_texture2d("background"), vec2{0,0}, vec2{f32(game.width), f32(game.height)}, 0)
-        draw_level(&game.levels[game.level])
-        draw_gameobject(player)
-        draw_particles()
-        draw_gameobject(ball)
-        draw_powerups(game.powerups[:])
-
-        pp_end_render()
-        pp_render(glfw.GetTime())
+        tr_render_text("Press ENTER to Start", 250, f32(game.height) / 2, 1)
+        tr_render_text("Press W/up or S/down to select level", 200, f32(game.height) / 2 + 25, .75)
+    }
+    if game.state == .Win
+    {
+        tr_render_text("YOU WIN!!!", 320, f32(game.height) / 2 - 25, 1, vec3{0,1,0})
+        tr_render_text("Press ENTER to retry or ESC to quit", 130, f32(game.height) / 2, 1, vec3{1,1,0})
     }
 }
 
@@ -278,7 +346,14 @@ check_all_collisions :: proc(game: ^Game)
     // ball bottom edge collision
     if ball.position.y >= f32(game.height)
     {
-        reset_level(game)
+        game.lives -= 1
+
+        if game.lives == 0
+        {
+            reset_level(game)
+            game.state = .Menu
+        }
+        
         reset_player(game)
     }
 
@@ -341,6 +416,8 @@ reset_level :: proc(game: ^Game)
         case 3:
             load_level(&game.levels[3], "assets/levels/fout.lvl", game.width, game.height / 2)
     }
+
+    game.lives = 3
 }
 
 reset_player :: proc(game: ^Game)

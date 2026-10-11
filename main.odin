@@ -10,6 +10,8 @@ import ma "vendor:miniaudio"
 
 SCREEN_WIDTH :: f32(800)
 SCREEN_HEIGHT :: f32(600)
+window_width := i32(SCREEN_WIDTH)
+window_height := i32(SCREEN_HEIGHT)
 
 main :: proc()
 {

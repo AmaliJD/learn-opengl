@@ -125,6 +125,7 @@ create_post_processor :: proc(shader: Shader, width, height: i32) -> Post_Proces
 pp_begin_render :: proc()
 {
     gl.BindFramebuffer(gl.FRAMEBUFFER, pp.MSFBO)
+    gl.Viewport(0, 0, pp.width, pp.height)
     gl.ClearColor(0, 0, 0, 1)
     gl.Clear(gl.COLOR_BUFFER_BIT)
 }
@@ -135,6 +136,8 @@ pp_end_render :: proc()
     gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, pp.FBO)
     gl.BlitFramebuffer(0, 0, pp.width, pp.height, 0, 0, pp.width, pp.height, gl.COLOR_BUFFER_BIT, gl.NEAREST)
     gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+    gl.Viewport(0, 0, window_width, window_height)
 }
 
 pp_render :: proc(time: f64)

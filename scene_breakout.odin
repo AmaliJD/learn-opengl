@@ -23,8 +23,6 @@ breakout_scene :: proc(window: glfw.WindowHandle)
 
     _breakout = create_game(u32(SCREEN_WIDTH), u32(SCREEN_HEIGHT))
 
-    init_game(&_breakout)
-
     for !glfw.WindowShouldClose(window)
     {
         curr_frame_time := glfw.GetTime()
@@ -54,7 +52,7 @@ key_callback_breakout :: proc "c" (window: glfw.WindowHandle, key, scancode, act
 {
     context = runtime.default_context()
 
-    if key == glfw.KEY_ESCAPE && action == glfw.PRESS
+    if key == glfw.KEY_ESCAPE && action == glfw.PRESS && _breakout.state != .Active
     {
         glfw.SetWindowShouldClose(window, true)
     }
@@ -62,6 +60,10 @@ key_callback_breakout :: proc "c" (window: glfw.WindowHandle, key, scancode, act
     if key >= 0 && key < 1024
     {
         if action == glfw.PRESS do _breakout.keys[key] = true
-        else if action == glfw.RELEASE do _breakout.keys[key] = false
+        else if action == glfw.RELEASE
+        {
+            _breakout.keys[key] = false
+            _breakout.keys_proccessed[key] = false
+        }
     }
 }

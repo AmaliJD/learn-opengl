@@ -77,6 +77,9 @@ process_input :: proc(window: glfw.WindowHandle)
 framebuffer_size_callback :: proc "c" (window: glfw.WindowHandle, width, height: i32)
 {
     gl.Viewport(0, 0, width, height)
+
+    window_width = width
+    window_height = height
 }
 
 key_callback :: proc "c" (window: glfw.WindowHandle, key, scancode, action, mods: i32)
