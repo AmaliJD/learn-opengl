@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/4670e809-e3be-405d-bf8e-d964715837f8
 
 ## Text Rendering: (https://learnopengl.com/In-Practice/Text-Rendering)
 
-The font used here is **Piazzolla** from HT Fonts
+The font used here is **Piazzolla** from HT Fonts. Instead of the FreeType library used in the tutorial I used the bundled stb/truetype library for reading true type font files. Unfortunately I do not remember how it works lol, but I'll need to revisit it to implement the performance boost that is storing all glyphs in a single texture atlas.
 
 <img width="797" height="597" alt="Screenshot 2026-10-06 205539" src="https://github.com/user-attachments/assets/1a18c16d-811c-4c0a-934e-12e523a2bcb7" />
 
@@ -48,7 +48,9 @@ Audio_Engine :: struct
 
 It's a small thing but it felt very satisfying building a functional system in Odin for what is basically a rudimentary custom engine!
 
-https://github.com/user-attachments/assets/eb221609-32a8-4336-9fec-a22d97df6ad9
+https://github.com/user-attachments/assets/0bdde583-3f7b-4746-85ee-893e76aeb69c
+
+
 
 
 
